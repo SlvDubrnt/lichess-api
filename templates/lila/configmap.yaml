@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "lichess-api.fullname" . }}-lila-config
+data:
+  application.conf: |
+    # Contenu du fichier lila.conf ici
+    # Par exemple :
+    lila {
+      domain = ${?LILA_DOMAIN}
+      url = ${?LILA_URL}
+      database {
+        timeout = ${?CONFIG_FORCE_mongo_timeout}
+      }
+    }
+

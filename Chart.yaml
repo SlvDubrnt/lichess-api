@@ -1,0 +1,7 @@
+apiVersion: v2
+name: lichess-api
+description: Helm chart for Lichess API based on docker-compose configuration
+version: 0.1.0
+appVersion: "latest"
+dependencies: []
+

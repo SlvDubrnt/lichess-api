@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lichess-api.fullname" . }}-fishnet-analysis
+  labels:
+    app.kubernetes.io/name: {{ include "lichess-api.name" . }}-fishnet-analysis
+spec:
+  replicas: {{ .Values.fishnet.analysis.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "lichess-api.name" . }}-fishnet-analysis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "lichess-api.name" . }}-fishnet-analysis
+    spec:
+      containers:
+      - name: fishnet-analysis
+        image: {{ .Values.fishnet.analysis.image }}
+        env:
+          {{- range $key, $value := .Values.fishnet.analysis.environment }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+        resources:
+          {{- toYaml .Values.fishnet.analysis.resources | nindent 10 }}
+

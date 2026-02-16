@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "lichess-api.fullname" . }}-lila
+  labels:
+    app.kubernetes.io/name: {{ include "lichess-api.name" . }}-lila
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9663
+    targetPort: 9663
+    name: lila
+  selector:
+    app.kubernetes.io/name: {{ include "lichess-api.name" . }}-lila
+

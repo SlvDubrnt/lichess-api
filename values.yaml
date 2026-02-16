@@ -1,0 +1,159 @@
+# Global settings
+global:
+  domain: localhost
+  url: http://localhost:8080
+
+# Networking
+service:
+  type: ClusterIP
+  port: 80
+
+# MongoDB configuration
+mongodb:
+  enabled: true
+  image: mongo:7.0.28-jammy
+  replicaSetName: rs0
+  primary:
+    replicas: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+  secondary:
+    enabled: true
+    replicas: 1
+    resources:
+      limits:
+        cpu: 300m
+        memory: 384Mi
+      requests:
+        cpu: 100m
+        memory: 192Mi
+
+# Redis configuration
+redis:
+  enabled: true
+  image: redis:8.0.3-alpine3.21
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# Lichess services configuration
+lila_ws:
+  enabled: true
+  image: slvdub/lila-ws:latest
+  platform: linux/amd64
+  environment:
+    CONFIG_FORCE_csrf.origin: ${LILA_URL:-http://localhost:8080}
+    CONFIG_FORCE_kamon.enabled: ${ENABLE_MONITORING:-false}
+    CONFIG_FORCE_influxdb.hostname: influxdb
+    CONFIG_FORCE_influxdb.authentication.token: secret
+    CONFIG_FORCE_mongo_uri: mongodb://mongodb:27017/lichess?appName=lila-ws
+    CONFIG_FORCE_redis.uri: redis://redis
+    CONFIG_FORCE_mongo_timeout: "30s"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+lila:
+  enabled: true
+  image: slvdub/lila:latest
+  platform: linux/amd64
+  environment:
+    LILA_DOMAIN: ${LILA_DOMAIN:-localhost:8080}
+    LILA_URL: ${LILA_URL:-http://localhost:8080}
+    MOCK_EMAIL: ${MOCK_EMAIL:-true}
+    ENABLE_MONITORING: ${ENABLE_MONITORING:-false}
+    ENABLE_RATE_LIMITING: ${ENABLE_RATE_LIMITING:-true}
+    JAVA_TOOL_OPTIONS: "--enable-native-access=ALL-UNNAMED"  
+  resources:
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+
+caddy:
+  enabled: true
+  image: caddy:2.10.2-alpine
+  ports:
+    - 8080:80
+  environment:
+    LILA_DOMAIN: ${LILA_DOMAIN:-localhost:8080}
+    LILA_URL: ${LILA_URL:-http://localhost:8080}
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+fishnet:
+  lila_fishnet:
+    enabled: true
+    image: slvdub/lila-fishnet:latest
+    platform: linux/amd64
+    environment:
+      REDIS_HOST: redis
+    resources:
+      limits:
+        cpu: 300m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  play:
+    enabled: true
+    image: niklasf/fishnet:2.10.0
+    environment:
+      ENDPOINT: http://lila_fishnet:9665/fishnet
+      MAX_BACKOFF: "5"
+      STATS_FILE: /stats.json
+    resources:
+      limits:
+        cpu: 300m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  analysis:
+    enabled: true
+    image: niklasf/fishnet:2.10.0
+    environment:
+      ENDPOINT: http://lila:9663/fishnet
+      MAX_BACKOFF: "5"
+      STATS_FILE: /stats.json
+    resources:
+      limits:
+        cpu: 300m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+# Persistence (à configurer selon besoins)
+persistence:
+  enabled: true
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  hostPath:
+    path: "/mnt/data"
+  storageClass: ""
+  accessModes: ["ReadWriteOnce"]
+  size: 10Gi
+

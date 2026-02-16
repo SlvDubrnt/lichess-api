@@ -1,0 +1,29 @@
+# templates/lila-ws/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lichess-api.fullname" . }}-lila-ws
+  labels:
+    app.kubernetes.io/name: {{ include "lichess-api.name" . }}-lila-ws
+spec:
+  replicas: {{ .Values.lila_ws.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "lichess-api.name" . }}-lila-ws
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "lichess-api.name" . }}-lila-ws
+    spec:
+      containers:
+      - name: lila-ws
+        image: "{{ .Values.lila_ws.image }}"
+        imagePullPolicy: Always
+        env:
+          {{- range $key, $value := .Values.lila_ws.environment }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+        resources:
+          {{- toYaml .Values.lila_ws.resources | nindent 10 }}
+

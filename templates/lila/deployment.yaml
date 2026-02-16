@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lichess-api.fullname" . }}-lila
+  labels:
+    app.kubernetes.io/name: {{ include "lichess-api.name" . }}-lila
+spec:
+  replicas: {{ .Values.lila.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "lichess-api.name" . }}-lila
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "lichess-api.name" . }}-lila
+    spec:
+      containers:
+      - name: lila
+        image: {{ .Values.lila.image }}
+        env:
+          {{- range $key, $value := .Values.lila.environment }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+          - name: CONFIG_FORCE_mongo_timeout
+            value: {{ .Values.lila.environment.CONFIG_FORCE_mongo_timeout | default "30s" | quote }}
+        ports:
+        - containerPort: 8080
+        - containerPort: 9663
+        resources:
+          {{- toYaml .Values.lila.resources | nindent 10 }}
+        volumeMounts:
+        - name: lila-config
+          mountPath: /lila/conf/application.conf
+          subPath: application.conf
+      volumes:
+      - name: lila-config
+        configMap:
+          name: {{ include "lichess-api.fullname" . }}-lila-config
