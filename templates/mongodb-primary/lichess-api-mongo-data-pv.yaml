@@ -1,0 +1,14 @@
+# postgres-pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "lichess-api.fullname" . }}-mongodb-data-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  hostPath:
+    path: "/mnt/data"

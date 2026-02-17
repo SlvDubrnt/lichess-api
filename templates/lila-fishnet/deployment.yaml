@@ -1,0 +1,23 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lichess-api.fullname" . }}-lila-fishnet
+spec:
+  replicas: {{ .Values.fishnet.lila_fishnet.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "lichess-api.name" . }}-lila-fishnet
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "lichess-api.name" . }}-lila-fishnet
+    spec:
+      containers:
+      - name: lila-fishnet
+        image: {{ .Values.fishnet.lila_fishnet.image }}
+        imagePullPolicy: {{ .Values.fishnet.lila_fishnet.pullPolicy | default "IfNotPresent" }}
+        env:
+          - name: REDIS_HOST
+            value: {{ .Values.fishnet.lila_fishnet.environment.REDIS_HOST | quote }}
+
