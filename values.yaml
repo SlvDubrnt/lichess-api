@@ -43,8 +43,8 @@ lila_ws:
     CONFIG_FORCE_kamon.enabled: ${ENABLE_MONITORING:-false}
     CONFIG_FORCE_influxdb.hostname: influxdb
     CONFIG_FORCE_influxdb.authentication.token: secret
-    CONFIG_FORCE_mongo_uri: mongodb://mongodb:27017/lichess?appName=lila-ws
-    CONFIG_FORCE_redis.uri: redis://redis
+    CONFIG_FORCE_mongo_uri: mongodb://lila-lichess-api-mongodb:27017/lichess?appName=lila-ws
+    CONFIG_FORCE_redis.uri: redis://lila-lichess-api-redis
     CONFIG_FORCE_mongo_timeout: "30s"
 
 lila:
@@ -77,7 +77,7 @@ fishnet:
     pullPolicy: Always
     platform: linux/amd64
     environment:
-      REDIS_HOST: redis
+      REDIS_HOST: lila-lichess-api-redis
 
   play:
     enabled: true
@@ -95,4 +95,7 @@ fishnet:
       MAX_BACKOFF: "5"
       STATS_FILE: /stats.json
 
+service:
+  type: ClusterIP
+  port: 80
 
